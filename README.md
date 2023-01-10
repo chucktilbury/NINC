@@ -56,6 +56,10 @@ number n = 10
 Number x ; keywords are not case sensitive
 boolean b = true
 
+; assuming the variables n and b have not changed,
+; this string prints out as "for bool ops, the number 10 is true"
+string s1 = "for bool ops, the number {n} is {b}\n"
+
 ; nothing function { is semantically identical
 ; cannot return a value 
 nothing function() {
