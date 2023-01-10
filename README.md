@@ -1,5 +1,5 @@
 # NINC
-NINC Is Not C
+NINC Is Not C -- pronounced nin'k, n-ink, or as the start of the word nincompoop. 
 
 This is the NINC programming language. It's a simple toy language that will help me learn how to the the packcc compiler generator. It consists of a compiler that compiles source code into assembly language, an assembler that creates a binary file from the assembly and a virtual machine that runs the binary. 
 
