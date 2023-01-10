@@ -1,0 +1,2 @@
+/usr/bin/ar qc ../../../bin/libcommon.a CMakeFiles/common.dir/memory.c.o
+/usr/bin/ranlib ../../../bin/libcommon.a

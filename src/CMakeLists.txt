@@ -1,0 +1,5 @@
+add_subdirectory(packcc)
+add_subdirectory(common)
+add_subdirectory(ninca)
+add_subdirectory(nincc)
+add_subdirectory(nincv)

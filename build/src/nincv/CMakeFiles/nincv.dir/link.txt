@@ -1,0 +1,1 @@
+/usr/bin/clang -g CMakeFiles/nincv.dir/nincv.c.o -o ../../../bin/nincv  ../../../bin/libcommon.a 

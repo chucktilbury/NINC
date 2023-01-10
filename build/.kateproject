@@ -1,0 +1,29 @@
+{
+	"name": "ninc-debug@build",
+	"directory": "/home/chuck/Src/NINC",
+	"files": [ { "git": 1 } ],
+	"build": {
+		"directory": "/home/chuck/Src/NINC/build",
+		"default_target": "all",
+		"clean_target": "clean",
+		"build": "/usr/bin/gmake -C \"/home/chuck/Src/NINC/build\" -j8 all",
+		"clean": "/usr/bin/gmake -C \"/home/chuck/Src/NINC/build\" -j8 clean",
+		"quick": "/usr/bin/gmake -C \"/home/chuck/Src/NINC/build\" -j8 install",
+		"targets":[
+			 {"name":"all", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build\" -j8 all"}
+			,{"name":"clean", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build\" -j8 clean"}
+			,{"name":"rebuild_cache", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build\" -j8 rebuild_cache"}
+			,{"name":"format-src", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build\" -j8 format-src"}
+			,{"name":"packcc", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build/src/packcc\" -j8 packcc"}
+			,{"name":"packcc/fast", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build/src/packcc\" -j8 packcc/fast"}
+			,{"name":"common", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build/src/common\" -j8 common"}
+			,{"name":"common/fast", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build/src/common\" -j8 common/fast"}
+			,{"name":"ninca", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build/src/ninca\" -j8 ninca"}
+			,{"name":"ninca/fast", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build/src/ninca\" -j8 ninca/fast"}
+			,{"name":"nincc", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build/src/nincc\" -j8 nincc"}
+			,{"name":"nincc/fast", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build/src/nincc\" -j8 nincc/fast"}
+			,{"name":"nincv", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build/src/nincv\" -j8 nincv"}
+			,{"name":"nincv/fast", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build/src/nincv\" -j8 nincv/fast"}
+			,{"name":"docs", "build_cmd":"/usr/bin/gmake -C \"/home/chuck/Src/NINC/build/docs\" -j8 docs"}
+	] }
+}
