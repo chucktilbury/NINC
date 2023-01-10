@@ -70,7 +70,7 @@ nothing function() {
     break ; keyword
   }
   
-  : comparison by value
+  ; comparison by value
   if ( x == 10 ) { ; curly braces are always required
     ; not, and, or are keywords
     if(x == n and "this is a string" == s) {
