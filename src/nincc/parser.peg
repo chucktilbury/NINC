@@ -1,0 +1,4 @@
+# This is the PEG grammar for the compiler.
+%prefix "comp"
+
+program <- 'foo' {}
