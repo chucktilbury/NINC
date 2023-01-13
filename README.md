@@ -1,12 +1,12 @@
-# NINC
-NINC Is Not C -- pronounced nin'k, n-ink, or as the start of the word nincompoop. 
+# NACC
+NACC Is Not A C Compiler -- pronounced as knack.
 
-This is the NINC programming language. It's a simple toy language that will help me learn how to the the packcc compiler generator. It consists of a compiler that compiles source code into assembly language, an assembler that creates a binary file from the assembly and a virtual machine that runs the binary. 
+This is the NACC programming language. It's a simple toy language that I am building for fun. It consists of a compiler that compiles source code into assembly language, an assembler that creates a binary file from the assembly and a virtual machine that runs the binary. 
 
-NINC is a single pass compiler. Symbols must be defined before they are used. Comments start with a ";" and end at the end of the line. Keywords are not case sensitive.
+NACC is a single pass compiler. Symbols must be defined before they are used. Comments start with a ";" and end at the end of the line. Keywords are not case sensitive.
 
 ## Not supported features
-NINC is a tiny subset of a "real" programming language.
+NACC is a tiny subset of a "real" programming language.
 - Pointers
 - Data strucutres
 
