@@ -1,4 +1,0 @@
-# This is the PEG grammar for the assembler.
-%prefix "asm"
-
-program <- 'foo' {}

@@ -5,5 +5,10 @@
 
 #include "memory.h"
 #include "ptrlst.h"
+#include "hash_table.h"
+#include "registers.h"
+#include "opcodes.h"
+#include "instructions.h"
+#include "values.h"
 
 #endif

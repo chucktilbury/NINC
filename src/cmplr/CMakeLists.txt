@@ -1,17 +1,7 @@
 project(nincc)
 
 add_executable(${PROJECT_NAME}
-    parser.c
     nincc.c
-)
-
-set(PACKCC packcc CACHE FILEPATH "Specify file path of packcc command.")
-
-add_custom_command(
-    OUTPUT parser.c parser.h
-    COMMAND ${PACKCC} ARGS -o parser ${CMAKE_CURRENT_SOURCE_DIR}/parser.peg
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/parser.peg
-    VERBATIM
 )
 
 target_link_libraries(${PROJECT_NAME}

@@ -1,6 +1,9 @@
 
-#include "common.h"
 #include <assert.h>
+
+#include "system.h"
+#include "memory.h"
+#include "ptrlst.h"
 
 PtrLst* createPtrLst() {
 
@@ -32,7 +35,7 @@ PtrLstResult appendPtrLst(PtrLst* lst, void* data) {
         lst->list = _realloc_ds_array(lst->list, void*, lst->cap);
     }
 
-    lst->list[list->len] = data;
+    lst->list[lst->len] = data;
     lst->len++;
 
     return PTRLST_OK;

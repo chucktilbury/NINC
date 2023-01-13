@@ -3,6 +3,12 @@ project(common)
 add_library(${PROJECT_NAME}
     STATIC
         memory.c
+        opcodes.c
+        ptrlst.c
+        registers.c
+        hash_table.c
+        instructions.c
+        values.c
 )
 
 target_include_directories(${PROJECT_NAME}
