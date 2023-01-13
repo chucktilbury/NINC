@@ -1,5 +1,6 @@
 
 #include "common.h"
+#include "vmach.h"
 
 int main() {
 

@@ -1,7 +1,7 @@
-project(nincv)
+project(vmach)
 
 add_executable(${PROJECT_NAME}
-    nincv.c
+    vmach.c
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -16,8 +16,7 @@ target_include_directories(${PROJECT_NAME}
 target_compile_options(${PROJECT_NAME} PRIVATE
     -Wall
     -Wextra
-    $<$<CONFIG:DEBUG>:-g3>
-    $<$<CONFIG:DEBUG>:-Og>
+    $<$<CONFIG:DEBUG>:-g>
     $<$<CONFIG:RELEASE>:-Ofast>
     $<$<CONFIG:PROFILE>:-pg -O0>
 )
