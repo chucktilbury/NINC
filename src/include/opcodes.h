@@ -21,6 +21,8 @@ typedef enum {
     OP_SIDX,    // Store the stack index into a register
 
     OP_LOAD,    // Load a register from a variable.
+    OP_LOADL,   // Load a register from a literal anonymous value.
+    OP_LOADR,   // Load a register from a another register.
     OP_STORE,   // Store a register into a variable.
 
     // comparison operators

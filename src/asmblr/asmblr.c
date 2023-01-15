@@ -24,11 +24,12 @@ void disasm(Assembler*);
 
 void dump_tables() {
 
+    printf("\n");
     disasm(asmblr);
     printf("\n");
     dumpValueStore(asmblr->valStore);
-    printf("\nSymbol Table:\n");
-    dump_hash(asmblr->symbols);
+    //printf("\nSymbol Table:\n");
+    //dump_hash(asmblr->symbols);
     dumpAddrs(asmblr);
     printf("\n");
 }
@@ -36,8 +37,11 @@ void dump_tables() {
 #include <stdarg.h>
 void syntax_error(const char* fmt, ...) {
 
-    fprintf(stderr, "%s:%d:%d syntax error, ",
-            get_file_name(), get_line_no(), get_col_no());
+    if(get_line_no() > 0)
+        fprintf(stderr, "%s:%d:%d syntax error, ",
+                get_file_name(), get_line_no(), get_col_no());
+    else
+        fprintf(stderr, "syntax error, ");
 
     va_list args;
 

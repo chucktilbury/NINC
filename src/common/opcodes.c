@@ -18,6 +18,8 @@ const char* opToStr(OpCode op)
             (op == OP_PEEK)? "PEEK":
             (op == OP_SIDX)? "SIDX":
             (op == OP_LOAD)? "LOAD":
+            (op == OP_LOADL)? "LOAD":
+            (op == OP_LOADR)? "LOAD":
             (op == OP_STORE)? "STORE":
             (op == OP_NOT)? "NOT":
             (op == OP_EQ)? "EQ":
@@ -71,6 +73,8 @@ int instrSize(OpCode op) {
         case OP_TRAP:   { retv = OP_INST_SZ+OP_VAL_SZ; } break;
         case OP_PEEK:   { retv = OP_INST_SZ+OP_2REG_SZ+OP_VAL_SZ; } break;
         case OP_LOAD:   { retv = OP_INST_SZ+OP_1REG_SZ+OP_VAL_SZ; } break;
+        case OP_LOADL:  { retv = OP_INST_SZ+OP_1REG_SZ+OP_VAL_SZ; } break;
+        case OP_LOADR:  { retv = OP_INST_SZ+OP_2REG_SZ; } break;
         case OP_STORE:  { retv = OP_INST_SZ+OP_VAL_SZ+OP_1REG_SZ; } break;
 
         default:

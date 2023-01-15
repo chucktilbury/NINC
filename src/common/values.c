@@ -3,12 +3,14 @@
 
 #include "common.h"
 
-Value* createValue(ValueType type) {
+Value* createValue(ValueType type, const char* name) {
 
     Value* val = _alloc_ds(Value);
     val->type = type;
     val->is_assigned = false;
     val->is_const = false;
+    if(name != NULL)
+        val->name = _copy_str(name);
 
     return val;
 }
@@ -34,6 +36,8 @@ void assignBoolVal(Value* value, bool val) {
 void destroyValue(Value* val) {
 
     assert(val != NULL);
+    if(val->name != NULL)
+        _free(val->name);
     _free(val);
 }
 
@@ -57,6 +61,8 @@ ValueStore* createValueStore() {
 void destroyValueStore(ValueStore* vs) {
 
     assert(vs != NULL);
+    for(size_t i = 0; i < vs->len; i++)
+        destroyValue(vs->lst[i]);
     _free(vs->lst);
     _free(vs);
 }
@@ -72,7 +78,7 @@ Value* getValue(ValueStore* store, size_t idx) {
     return NULL;
 }
 
-size_t addValue(ValueStore* store, Value* val) {
+size_t addValue(ValueStore* store, Value* val, const char* name) {
 
     assert(store != NULL);
 
@@ -81,6 +87,8 @@ size_t addValue(ValueStore* store, Value* val) {
         store->lst = _realloc_ds_array(store->lst, Value*, store->cap);
     }
 
+    if(name != NULL)
+        val->name = _copy_str(name);
     size_t idx = store->len;
     store->lst[store->len] = val;
     store->len++;
@@ -132,10 +140,11 @@ static const char* val_type_to_str(ValueType type) {
         (type == VAL_BVAL)? "BOOLEAN": "UNKNOWN";
 }
 
-static void dump_value(int idx, Value* val) {
+void dumpValue(int idx, Value* val) {
 
-    printf("\t%d:%s:%c:%c: ", idx, val_type_to_str(val->type),
-            val->is_assigned? 't': 'f', val->is_const? 't':'f');
+    printf("\t%d:%s:%c:%c:\t\"%s\"\t", idx, val_type_to_str(val->type),
+            val->is_assigned? 't': 'f', val->is_const? 't':'f',
+            val->name? val->name: "");
 
     switch(val->type) {
         case VAL_NUM: printf("%f ", val->data.num); break;
@@ -155,7 +164,7 @@ void dumpValueStore(ValueStore* store) {
     Value** lst = store->lst;
     printf("Value Store:\n");
     for(size_t idx = 0; idx < len; idx++) {
-        dump_value(idx, lst[idx]);
+        dumpValue(idx, lst[idx]);
     }
 }
 
@@ -192,7 +201,7 @@ void loadValueStore(ValueStore* store, FILE* fp) {
     fread(&store->len, sizeof(store->len), 1, fp);
     for(size_t idx = 0; idx < store->len; idx++) {
         Value* val = load_value(fp);
-        addValue(store, val);
+        addValue(store, val, NULL);
     }
 }
 

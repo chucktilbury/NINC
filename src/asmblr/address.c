@@ -99,18 +99,19 @@ void fixupAddrs(Assembler* ptr) {
     for(size_t idx = 0; idx < rtab->len; idx++) {
         AddrRef* ref = rtab->lst[idx];
         uint32_t loc;
-        get_addr_def(dtab, ref->name, &loc);
+        if(get_addr_def(dtab, ref->name, &loc) != HASH_OK)
+            syntax_error("label \"%s\" has not been defined", ref->name);
         updateInstrBuf(ptr->instrBuf, ref->loc, &loc, sizeof(uint32_t));
     }
 }
 
 /*
- * Look up the name of a label from the hash table.
+ * Look up the name of a label from the label reference hash table.
  *
  * VERY INEFFICIENT.
  *
  */
-const char* lookupAddrName(AddrDefTab* tab, uint32_t val) {
+const char* lookupAddrRefName(AddrDefTab* tab, uint32_t val) {
 
     for(int i = 0; i < tab->cap; i++) {
         if(tab->table[i] != NULL) {
@@ -121,7 +122,7 @@ const char* lookupAddrName(AddrDefTab* tab, uint32_t val) {
         }
     }
 
-    return "unknown";
+    return NULL;
 }
 
 void dumpAddrs(Assembler* ptr) {

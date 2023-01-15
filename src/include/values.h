@@ -14,6 +14,7 @@ typedef enum {
 
 struct _value_ {
     ValueType type;
+    const char* name;
     union {
         double num;
         char* str;
@@ -30,7 +31,7 @@ struct _value_store_ {
     size_t len;
 };
 
-Value* createValue(ValueType type);
+Value* createValue(ValueType type, const char* name);
 void assignNumVal(Value* value, double val);
 void assignStrVal(Value* value, const char* val);
 void assignBoolVal(Value* value, bool val);
@@ -41,13 +42,14 @@ ValueStore* createValueStore();
 void destroyValueStore(ValueStore* vs);
 
 Value* getValue(ValueStore* store, size_t idx);
-size_t addValue(ValueStore* store, Value* val);
+size_t addValue(ValueStore* store, Value* val, const char* name);
 
 //void createNames();
 //Value* getValueName(ValueStore* store, const char* name);
 //ValStoreResult addValueName(ValueStore* store, const char* name, Value* val);
 
 void dumpValueStore(ValueStore* store);
+void dumpValue(int idx, Value* val);
 
 #include <stdio.h>
 void loadValueStore(ValueStore* store, FILE* fp);

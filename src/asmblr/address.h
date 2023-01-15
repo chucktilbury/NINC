@@ -28,6 +28,6 @@ void addAddrDef(Assembler* ptr, const char* name);
 void addAddrRef(Assembler* ptr, const char* name);
 void fixupAddrs(Assembler* ptr);
 void dumpAddrs(Assembler* ptr);
-const char* lookupAddrName(AddrDefTab* tab, uint32_t val);
+const char* lookupAddrRefName(AddrDefTab* tab, uint32_t val);
 
 #endif

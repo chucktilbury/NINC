@@ -124,18 +124,18 @@ int yycolumn = 1;
 "CONST"         { return CONST; }
     /* End unique rules */
 
-[a-zA-Z_$][a-zA-Z_0-9$]* {
+[a-zA-Z_$][a-zA-Z_0-9$\.#%&@!]* {
         asm_lval.symbol = (char*)strdup(asm_text);
         return SYMBOL;
     }
 
-[0-9]+ {
+-?[0-9]+ {
         asm_lval.num = (double)strtol(asm_text, NULL, 10);
         return NUM;
     }
 
     /* recognize a float */
-([0-9]*\.)?[0-9]+([Ee][-+]?[0-9]+)? {
+-?([0-9]*\.)?[0-9]+([Ee][-+]?[0-9]+)? {
         asm_lval.num = strtod(asm_text, NULL);
         return NUM;
     }

@@ -9,10 +9,16 @@ void disasm(Assembler* ptr) {
 
     InstrBuf* ibuf = ptr->instrBuf;
 
+    uint8_t op;
+    size_t idx = 0;
     int line = 1;
+    const char* name = NULL;
+
     do {
-        uint8_t op;
-        size_t idx = getInstrBufIdx(ibuf);
+        idx = getInstrBufIdx(ibuf);
+        name = lookupAddrRefName(ptr->addrDefs, idx);
+        if(name != NULL)
+            printf("%d.\t\t%s:\t; defined at address %04lu\n", line++, name, idx);
         readInstrBuf(ibuf, &op, sizeof(op));
         printf("%d.\t%04u\t%s ", line++, (uint32_t)idx, opToStr(op));
         switch(op) {
@@ -69,22 +75,58 @@ void disasm(Assembler* ptr) {
                 break;
             // value index
             case OP_PUSHS: {
-                    printf("\n");
+                    uint16_t val;
+                    readInstrBuf(ibuf, &val, sizeof(val));
+                    Value* vptr = getValue(ptr->valStore, val);
+                    printf("%s\t; index number %d\n", vptr->name, val);
                 }
                 break;
             // two registers and one 16 bit word
             case OP_PEEK: {
-                    printf("\n");
+                    uint8_t regs;
+                    uint16_t num;
+                    readInstrBuf(ibuf, &regs, sizeof(regs));
+                    readInstrBuf(ibuf, &num, sizeof(num));
+                    printf("%s, %s, %u\n",
+                           regToStr(regs&0x0F), regToStr((regs&0xF0)>>4), num);
                 }
                 break;
             // one register, one var
             case OP_LOAD: {
-                    printf("\n");
+                    uint8_t regs;
+                    uint16_t num;
+                    readInstrBuf(ibuf, &regs, sizeof(regs));
+                    readInstrBuf(ibuf, &num, sizeof(num));
+                    Value* vptr = getValue(ptr->valStore, num);
+                    printf("%s, %s\t; index number %d\n",
+                           regToStr(regs&0x0F), vptr->name, num);
+                }
+                break;
+            case OP_LOADL: {
+                    uint8_t regs;
+                    uint16_t num;
+                    readInstrBuf(ibuf, &regs, sizeof(regs));
+                    readInstrBuf(ibuf, &num, sizeof(num));
+                    Value* vptr = getValue(ptr->valStore, num);
+                    printf("%s, anonymous\t; index number ", regToStr(regs&0x0F));
+                    dumpValue(num, vptr);
+                }
+                break;
+            case OP_LOADR: {
+                    uint8_t regs;
+                    readInstrBuf(ibuf, &regs, sizeof(regs));
+                    printf("%s, %s\n", regToStr(regs&0x0F), regToStr((regs&0xF0)>>4));
                 }
                 break;
             // one var, one register
             case OP_STORE: {
-                    printf("\n");
+                    uint8_t regs;
+                    uint16_t num;
+                    readInstrBuf(ibuf, &num, sizeof(num));
+                    readInstrBuf(ibuf, &regs, sizeof(regs));
+                    Value* vptr = getValue(ptr->valStore, num);
+                    printf("%s, %s\t; index number %d\n",
+                           vptr->name, regToStr(regs&0x0F), num);
                 }
                 break;
             // one 32 bit word
@@ -93,8 +135,8 @@ void disasm(Assembler* ptr) {
             case OP_CALL: {
                     uint32_t val;
                     readInstrBuf(ibuf, &val, sizeof(val));
-                    const char* name = lookupAddrName(ptr->addrDefs, val);
-                    printf("%s\t;  %04u\n", name, val);
+                    name = lookupAddrRefName(ptr->addrDefs, val);
+                    printf("%s\t; refers to address %04u\n", name, val);
                 }
                 break;
             default:
