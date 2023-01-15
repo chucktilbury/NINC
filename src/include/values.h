@@ -12,7 +12,7 @@ typedef enum {
     VAL_BVAL,
 } ValueType;
 
-typedef struct {
+struct _value_ {
     ValueType type;
     union {
         double num;
@@ -20,19 +20,20 @@ typedef struct {
         bool bval;
     } data;
     bool is_assigned;
-} Value;
+    bool is_const;
+};
 
 #include <stddef.h>
-typedef struct {
+struct _value_store_ {
     Value** lst;
     size_t cap;
     size_t len;
-} ValueStore;
+};
 
 Value* createValue(ValueType type);
-Value* createNumVal(double val);
-Value* createStrVal(const char* val);
-Value* createBoolVal(bool val);
+void assignNumVal(Value* value, double val);
+void assignStrVal(Value* value, const char* val);
+void assignBoolVal(Value* value, bool val);
 void destroyValue(Value* val);
 ValueType getValType(Value* val);
 
@@ -42,9 +43,9 @@ void destroyValueStore(ValueStore* vs);
 Value* getValue(ValueStore* store, size_t idx);
 size_t addValue(ValueStore* store, Value* val);
 
-void createNames();
-Value* getValueName(ValueStore* store, const char* name);
-ValStoreResult addValueName(ValueStore* store, const char* name, Value* val);
+//void createNames();
+//Value* getValueName(ValueStore* store, const char* name);
+//ValStoreResult addValueName(ValueStore* store, const char* name, Value* val);
 
 void dumpValueStore(ValueStore* store);
 

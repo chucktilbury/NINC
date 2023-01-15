@@ -15,16 +15,17 @@ typedef struct {
     size_t size;
 } HashNode;
 
+
 /*
  * If a node's key is NULL, but the bucket pointer in the table
  * is not NULL, then the bucket is a tombstone.
  */
-typedef struct {
+struct _hash_tab_ {
     HashNode** table;
     int cap;
     int count;
     int tombstones;
-} HashTab;
+};
 
 HashTab* createHashTab();
 void destroyHashTab(HashTab* table);

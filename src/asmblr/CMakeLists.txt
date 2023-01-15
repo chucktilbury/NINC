@@ -1,4 +1,4 @@
-project(ninca)
+project(asmblr)
 
 find_package(FLEX REQUIRED)
 find_package(BISON REQUIRED)
@@ -21,6 +21,9 @@ add_executable(${PROJECT_NAME}
     ${BISON_PARSER_OUTPUTS}
     ${FLEX_SCANNER_OUTPUTS}
     asmblr.c
+    emit.c
+    address.c
+    disasm.c
 )
 
 target_link_libraries(${PROJECT_NAME}

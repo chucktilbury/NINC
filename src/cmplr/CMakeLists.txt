@@ -1,7 +1,7 @@
-project(nincc)
+project(cmplr)
 
 add_executable(${PROJECT_NAME}
-    nincc.c
+    cmplr.c
 )
 
 target_link_libraries(${PROJECT_NAME}

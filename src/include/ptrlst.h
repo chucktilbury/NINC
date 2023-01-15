@@ -7,12 +7,12 @@ typedef enum {
     PTRLST_EMPTY,
 } PtrLstResult;
 
-typedef struct {
+struct _ptr_lst_ {
     void** list;
     int cap;
     int len;
     int idx;
-} PtrLst;
+};
 
 PtrLst* createPtrLst();
 PtrLstResult destroyPtrLst(PtrLst* lst);

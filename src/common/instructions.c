@@ -1,9 +1,6 @@
 
 #include <assert.h>
-
-#include "system.h"
-#include "memory.h"
-#include "instructions.h"
+#include "common.h"
 
 InstrBuf* createInstrBuf() {
 
@@ -23,6 +20,7 @@ void destroyInstrBuf(InstrBuf* ptr) {
     _free(ptr);
 }
 
+// write to the end of the instruction buffer.
 InstrBufResult writeInstrBuf(InstrBuf* ptr, void* data, size_t size) {
 
     assert(ptr != NULL);
@@ -40,6 +38,20 @@ InstrBufResult writeInstrBuf(InstrBuf* ptr, void* data, size_t size) {
     return INSTR_BUF_OK;
 }
 
+// write to the end of the instruction buffer.
+InstrBufResult updateInstrBuf(InstrBuf* ptr, size_t idx, void* data, size_t size) {
+
+    assert(ptr != NULL);
+    assert(data != NULL);
+
+    if(idx+size < ptr->len) {
+        memcpy(&ptr->buffer[idx], data, size);
+        return INSTR_BUF_OK;
+    }
+
+    return INSTR_BUF_ERROR;
+}
+
 InstrBufResult readInstrBuf(InstrBuf* ptr, void* data, size_t size) {
 
     assert(ptr != NULL);
@@ -52,6 +64,12 @@ InstrBufResult readInstrBuf(InstrBuf* ptr, void* data, size_t size) {
     }
 
     return INSTR_BUF_ERROR;
+}
+
+size_t getInstrBufIdx(InstrBuf* ptr) {
+
+    assert(ptr != NULL);
+    return ptr->idx;
 }
 
 // This returns the write location for setting the location of labels.

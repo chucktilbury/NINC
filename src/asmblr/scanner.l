@@ -78,6 +78,7 @@ int yycolumn = 1;
 
 "EXIT"          { asm_lval.opcode = OP_EXIT; return EXIT; }
 "NOP"           { asm_lval.opcode = OP_NOP; return NOP; }
+"BREAK"         { asm_lval.opcode = OP_BREAK; return BREAK; }
 "CALL"          { asm_lval.opcode = OP_CALL; return CALL; }
 "TRAP"          { asm_lval.opcode = OP_TRAP; return TRAP; }
 "RETURN"        { asm_lval.opcode = OP_RETURN; return RETURN; }

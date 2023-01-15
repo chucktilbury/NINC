@@ -1,47 +1,34 @@
 
 #include <assert.h>
 
-#include "system.h"
-#include "memory.h"
-#include "hash_table.h"
-#include "values.h"
-
-static HashTab* symbols;
+#include "common.h"
 
 Value* createValue(ValueType type) {
 
     Value* val = _alloc_ds(Value);
     val->type = type;
     val->is_assigned = false;
+    val->is_const = false;
 
     return val;
 }
 
-Value* createNumVal(double val) {
+void assignNumVal(Value* value, double val) {
 
-    Value* value = createValue(VAL_NUM);
     value->data.num = val;
     value->is_assigned = true;
-
-    return value;
 }
 
-Value* createStrVal(const char* val) {
+void assignStrVal(Value* value, const char* val) {
 
-    Value* value = createValue(VAL_STR);
     value->data.str = (char*)val;
     value->is_assigned = true;
-
-    return value;
 }
 
-Value* createBoolVal(bool val) {
+void assignBoolVal(Value* value, bool val) {
 
-    Value* value = createValue(VAL_BVAL);
     value->data.bval = val;
     value->is_assigned = true;
-
-    return value;
 }
 
 void destroyValue(Value* val) {
@@ -101,42 +88,42 @@ size_t addValue(ValueStore* store, Value* val) {
     return idx;
 }
 
-void createNames() {
+// void createNames() {
+//
+//     symbols = createHashTab();
+// }
 
-    symbols = createHashTab();
-}
+// Value* getValueName(ValueStore* store, const char* name) {
+//
+//     assert(store != NULL);
+//     assert(name != NULL);
+//
+//     size_t idx;
+//     HashTabResult res;
+//
+//     res = findHashTab(symbols, name, &idx, sizeof(idx));
+//     if(res == HASH_OK)
+//         return getValue(store, idx);
+//
+//     return NULL;
+// }
 
-Value* getValueName(ValueStore* store, const char* name) {
-
-    assert(store != NULL);
-    assert(name != NULL);
-
-    size_t idx;
-    HashTabResult res;
-
-    res = findHashTab(symbols, name, &idx, sizeof(idx));
-    if(res == HASH_OK)
-        return getValue(store, idx);
-
-    return NULL;
-}
-
-ValStoreResult addValueName(ValueStore* store, const char* name, Value* val) {
-
-    assert(store != NULL);
-    assert(name != NULL);
-    assert(val != NULL);
-
-    size_t idx;
-    HashTabResult res;
-
-    idx = addValue(store, val);
-    res = insertHashTab(symbols, name, &idx, sizeof(idx));
-    if(res != HASH_OK)
-        return VAL_STORE_ERROR;
-
-    return VAL_STORE_OK;
-}
+// ValStoreResult addValueName(ValueStore* store, const char* name, Value* val) {
+//
+//     assert(store != NULL);
+//     assert(name != NULL);
+//     assert(val != NULL);
+//
+//     size_t idx;
+//     HashTabResult res;
+//
+//     idx = addValue(store, val);
+//     res = insertHashTab(symbols, name, &idx, sizeof(idx));
+//     if(res != HASH_OK)
+//         return VAL_STORE_ERROR;
+//
+//     return VAL_STORE_OK;
+// }
 
 static const char* val_type_to_str(ValueType type) {
 
@@ -145,15 +132,19 @@ static const char* val_type_to_str(ValueType type) {
         (type == VAL_BVAL)? "BOOLEAN": "UNKNOWN";
 }
 
-static void dump_value(Value* val) {
+static void dump_value(int idx, Value* val) {
 
-    printf(" %s: ", val_type_to_str(val->type));
+    printf("\t%d:%s:%c:%c: ", idx, val_type_to_str(val->type),
+            val->is_assigned? 't': 'f', val->is_const? 't':'f');
+
     switch(val->type) {
         case VAL_NUM: printf("%f ", val->data.num); break;
         case VAL_STR: printf("\"%s \"", val->data.str); break;
         case VAL_BVAL: printf("%s ", val->data.bval? "true": "false"); break;
         default: printf("UNKNOWN"); break;
     }
+
+    printf("\n");
 }
 
 void dumpValueStore(ValueStore* store) {
@@ -162,10 +153,9 @@ void dumpValueStore(ValueStore* store) {
 
     size_t len = store->len;
     Value** lst = store->lst;
+    printf("Value Store:\n");
     for(size_t idx = 0; idx < len; idx++) {
-        printf("%3lu.", idx+1);
-        dump_value(lst[idx]);
-        printf("\n");
+        dump_value(idx, lst[idx]);
     }
 }
 

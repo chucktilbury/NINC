@@ -1,9 +1,7 @@
 
 #include <assert.h>
 
-#include "system.h"
-#include "memory.h"
-#include "ptrlst.h"
+#include "common.h"
 
 PtrLst* createPtrLst() {
 

@@ -25,10 +25,7 @@
  */
 
 #include <assert.h>
-
-#include "system.h"
-#include "hash_table.h"
-#include "memory.h"
+#include "common.h"
 
 static uint32_t hash_func(const char* key) {
 

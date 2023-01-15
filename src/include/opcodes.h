@@ -15,17 +15,13 @@ typedef enum {
 
     // data manipulation instructions
     OP_PUSH,    // push the register value on the value stack (change to variable)
-    OP_PUSHI,   // push an immediate value on the value stack
-    OP_PUSHV,   // push a value on the value stack
+    OP_PUSHS,   // push the symbolic value on the value stack (change to variable)
     OP_POP,     // pop the value from the stack and put it in a register
     OP_PEEK,    // Stack access for function parameters.
     OP_SIDX,    // Store the stack index into a register
 
     OP_LOAD,    // Load a register from a variable.
-    OP_LOADI,   // load a register from an immediate.
-    OP_LOADR,   // load a register from another register (copy)
     OP_STORE,   // Store a register into a variable.
-    OP_STOREI,  // Store an immediate value into a variable.
 
     // comparison operators
     OP_NOT,     // unary not conditional
@@ -46,6 +42,15 @@ typedef enum {
 
 } OpCode;
 
+#define OP_1REG_SZ  sizeof(uint8_t)
+#define OP_2REG_SZ  sizeof(uint8_t)
+#define OP_3REG_SZ  sizeof(uint16_t)
+#define OP_INST_SZ  sizeof(uint8_t)
+#define OP_ADDR_SZ  sizeof(uint32_t)
+#define OP_VAL_SZ   sizeof(uint16_t)
+#define OP_INCR(op) (instrSize(op)-OP_INST_SZ)
+
 const char* opToStr(OpCode op);
+int instrSize(OpCode op);
 
 #endif

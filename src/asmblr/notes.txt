@@ -1,0 +1,14 @@
+
+- Add characters such as $%& to valid symbols
+
+Address resolution.
+
+There are address definitions as labels and there are address references as
+jump destinations. The definition, when it appears, needs to retrieve a
+physical index into the instruction stream to jump to. That can be stored in
+a hash table.
+
+The address references can have numerous references for the same address.
+References are accessed by name. References need to hold the name to it can be
+looked up in the address definition hash table. as well as the location in the
+instruction stream to edit.
