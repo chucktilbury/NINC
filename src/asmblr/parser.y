@@ -202,7 +202,7 @@ instruction_definition
             emit_2_reg(asmblr->instrBuf, $2, $4);
         }
     | LOAD register ',' register {
-            emit_instr(asmblr->instrBuf, OP_LOAD);
+            emit_instr(asmblr->instrBuf, OP_LOADR);
             emit_2_reg(asmblr->instrBuf, $2, $4);
         }
     /* Three register operands */

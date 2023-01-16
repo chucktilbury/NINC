@@ -1,7 +1,16 @@
 
-- Add characters such as $%& to valid symbols
+NOTE: the word "address" here refers to an index in the instruction stream. The
+word "value" refers to what would otherwise be a memory location in a
+conventional MPU or MCU.
 
-Address resolution.
+{ Add ability to load address and jump to an address held by a register. If a
+load instruction refers to a symbol, then look it up in the value table, and if
+it is not found there, then treat it as an address forward reference. }
+
+<done> { Add characters such as $%& to valid symbols }
+
+<done>
+{ Address resolution.
 
 There are address definitions as labels and there are address references as
 jump destinations. The definition, when it appears, needs to retrieve a
@@ -11,4 +20,4 @@ a hash table.
 The address references can have numerous references for the same address.
 References are accessed by name. References need to hold the name to it can be
 looked up in the address definition hash table. as well as the location in the
-instruction stream to edit.
+instruction stream to edit. }

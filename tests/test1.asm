@@ -32,6 +32,7 @@ $lab2$:
     load r12, -123.45e-2
     load r11, "this is a string"
     load r0, false
+    load r0, r0
 
 
 end:

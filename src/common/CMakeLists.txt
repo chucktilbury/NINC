@@ -9,6 +9,7 @@ add_library(${PROJECT_NAME}
         hash_table.c
         instructions.c
         values.c
+        cmdline.c
 )
 
 target_include_directories(${PROJECT_NAME}

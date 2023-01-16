@@ -7,6 +7,7 @@ typedef enum {
     HASH_OK,
     HASH_DUP,
     HASH_NF,
+    HASH_ERROR,
 } HashTabResult;
 
 typedef struct {

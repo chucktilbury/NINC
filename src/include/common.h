@@ -16,5 +16,6 @@ typedef struct _hash_tab_ HashTab;
 #include "opcodes.h"
 #include "instructions.h"
 #include "values.h"
+#include "cmdline.h"
 
 #endif

@@ -47,19 +47,16 @@ static int find_slot(HashTab* tab, const char* key) {
     inc = (inc == 0) ? 1 : inc;
 
     if(tab->table[hash] == NULL) {
-        tab->count++;
         return hash;
     }
     else {
         do {
             for(int i = 0; i < tab->cap; i++) {
                 if(tab->table[hash] == NULL) {
-                    tab->count++;
                     return hash;
                 }
                 else if(tab->table[hash]->key == NULL) {
                     tab->tombstones--;
-                    tab->count++;
                     return hash;
                 }
                 else if(strcmp(tab->table[hash]->key, key) == 0) {
@@ -80,6 +77,7 @@ static void rehash_table(HashTab* tab) {
     if(tab->count * 1.75 > tab->cap) {
         int oldcap = tab->cap;
         HashNode** oldtab = tab->table;
+
         tab->cap <<= 1; // double the capacity
         tab->tombstones = 0;
         tab->count = 0;
@@ -93,6 +91,7 @@ static void rehash_table(HashTab* tab) {
             if(oldtab[i] != NULL && oldtab[i]->key != NULL) {
                 slot = find_slot(tab, oldtab[i]->key);
                 tab->table[slot] = oldtab[i];
+                tab->count++;
             }
         }
         _free(oldtab);
@@ -137,7 +136,7 @@ HashTabResult insertHashTab(HashTab* table, const char* key, void* data, size_t 
 
     int slot = find_slot(table, key);
     if(slot < 0)
-        return false;
+        return HASH_ERROR;
 
     // help me, obi wan optimizer, you are my only hope
     if(table->table[slot] != NULL) {
@@ -146,8 +145,10 @@ HashTabResult insertHashTab(HashTab* table, const char* key, void* data, size_t 
             return HASH_DUP;
         }
     }
-    else
+    else {
         table->table[slot] = _alloc_ds(HashNode);
+        table->count++;
+    }
 
     table->table[slot]->key = _copy_str(key);
     if(data != NULL && size != 0) {

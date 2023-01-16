@@ -175,6 +175,11 @@ static Value* load_value(FILE* fp) {
     fread(&val->type, sizeof(val->type), 1, fp);
     fread(&val->is_assigned, sizeof(val->is_assigned), 1, fp);
 
+    size_t sz;
+    fread(&sz, sizeof(sz), 1, fp);
+    val->name = _alloc(sz);
+    fread((void*)val->name, sizeof(char), sz, fp);
+
     if(val->is_assigned) {
         switch(val->type) {
             case VAL_NUM:
@@ -198,8 +203,9 @@ static Value* load_value(FILE* fp) {
 
 void loadValueStore(ValueStore* store, FILE* fp) {
 
-    fread(&store->len, sizeof(store->len), 1, fp);
-    for(size_t idx = 0; idx < store->len; idx++) {
+    size_t len;
+    fread(&len, sizeof(len), 1, fp);
+    for(size_t idx = 0; idx < len; idx++) {
         Value* val = load_value(fp);
         addValue(store, val, NULL);
     }
@@ -209,6 +215,18 @@ static void save_value(Value* val, FILE* fp) {
 
     fwrite(&val->type, sizeof(val->type), 1, fp);
     fwrite(&val->is_assigned, sizeof(val->is_assigned), 1, fp);
+
+    if(val->name != NULL) {
+        size_t sz = strlen(val->name) + 1;
+        fwrite(&sz, sizeof(sz), 1, fp);
+        fwrite(val->name, sizeof(char), sz, fp);
+    }
+    else {
+        size_t sz = 1;
+        fwrite(&sz, sizeof(sz), 1, fp);
+        char* buf[1] = {0};
+        fwrite(buf, sizeof(char), sz, fp);
+    }
 
     if(val->is_assigned) {
         switch(val->type) {
