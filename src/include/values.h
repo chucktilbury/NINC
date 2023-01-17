@@ -10,6 +10,7 @@ typedef enum {
     VAL_NUM,
     VAL_STR,
     VAL_BVAL,
+    VAL_ADDR,
 } ValueType;
 
 struct _value_ {
@@ -19,6 +20,7 @@ struct _value_ {
         double num;
         char* str;
         bool bval;
+        uint32_t addr;
     } data;
     bool is_assigned;
     bool is_const;

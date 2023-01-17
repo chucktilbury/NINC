@@ -96,48 +96,12 @@ size_t addValue(ValueStore* store, Value* val, const char* name) {
     return idx;
 }
 
-// void createNames() {
-//
-//     symbols = createHashTab();
-// }
-
-// Value* getValueName(ValueStore* store, const char* name) {
-//
-//     assert(store != NULL);
-//     assert(name != NULL);
-//
-//     size_t idx;
-//     HashTabResult res;
-//
-//     res = findHashTab(symbols, name, &idx, sizeof(idx));
-//     if(res == HASH_OK)
-//         return getValue(store, idx);
-//
-//     return NULL;
-// }
-
-// ValStoreResult addValueName(ValueStore* store, const char* name, Value* val) {
-//
-//     assert(store != NULL);
-//     assert(name != NULL);
-//     assert(val != NULL);
-//
-//     size_t idx;
-//     HashTabResult res;
-//
-//     idx = addValue(store, val);
-//     res = insertHashTab(symbols, name, &idx, sizeof(idx));
-//     if(res != HASH_OK)
-//         return VAL_STORE_ERROR;
-//
-//     return VAL_STORE_OK;
-// }
-
 static const char* val_type_to_str(ValueType type) {
 
     return (type == VAL_NUM )? "NUMBER":
         (type == VAL_STR )? "STRING":
-        (type == VAL_BVAL)? "BOOLEAN": "UNKNOWN";
+        (type == VAL_BVAL)? "BOOLEAN":
+        (type == VAL_ADDR)? "ADDRESS": "UNKNOWN";
 }
 
 void dumpValue(int idx, Value* val) {
@@ -148,6 +112,7 @@ void dumpValue(int idx, Value* val) {
 
     switch(val->type) {
         case VAL_NUM: printf("%f ", val->data.num); break;
+        case VAL_ADDR: printf("%u ", val->data.addr); break;
         case VAL_STR: printf("\"%s \"", val->data.str); break;
         case VAL_BVAL: printf("%s ", val->data.bval? "true": "false"); break;
         default: printf("UNKNOWN"); break;
@@ -184,6 +149,9 @@ static Value* load_value(FILE* fp) {
         switch(val->type) {
             case VAL_NUM:
                 fread(&val->data.num, sizeof(val->data.num), 1, fp);
+                break;
+            case VAL_ADDR:
+                fread(&val->data.addr, sizeof(val->data.addr), 1, fp);
                 break;
             case VAL_BVAL:
                 fread(&val->data.bval, sizeof(val->data.bval), 1, fp);
@@ -232,6 +200,9 @@ static void save_value(Value* val, FILE* fp) {
         switch(val->type) {
             case VAL_NUM:
                 fwrite(&val->data.num, sizeof(val->data.num), 1, fp);
+                break;
+            case VAL_ADDR:
+                fwrite(&val->data.addr, sizeof(val->data.addr), 1, fp);
                 break;
             case VAL_BVAL:
                 fwrite(&val->data.bval, sizeof(val->data.bval), 1, fp);
