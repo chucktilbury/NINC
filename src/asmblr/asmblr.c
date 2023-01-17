@@ -28,8 +28,6 @@ void dump_tables(Assembler* ptr) {
     disasm(ptr);
     printf("\n");
     dumpValueStore(ptr->valStore);
-    //printf("\nSymbol Table:\n");
-    //dump_hash(ptr->symbols);
     dumpAddrs(ptr);
     printf("\n");
 }
@@ -141,8 +139,9 @@ Assembler* load_module(const char* fname) {
 
 int main(int argc, char** argv) {
 
-    initCmdLine(CL_FL_ONE, "This is the assembler. It reads the assembly language input\n"
-                            "and converts it to a binary for use by the virtual machine.\n");
+    initCmdLine(CL_FL_ONE,
+                "This is the assembler. It reads the assembly language input\n"
+                "and converts it to a binary for use by the virtual machine.\n");
     addStrParam("-o", "ofile", "output file name", "output.bin", CL_REQD);
     addNumParam("-v", "verbose", "verbosity number from 0 to 10", 0, CL_NONE);
     addCBwoParam("-h", "show the help information", showUseCmdLine, CL_NONE);
@@ -150,14 +149,12 @@ int main(int argc, char** argv) {
 
     asmblr = createAsmblr();
 
-    if(isatty(fileno(stdin))) {
-        resetCLFileList();
-        const char* name = iterateCLFileList();
-        if(name != NULL && strlen(name) > 0)
-            open_file(name);
-        else
-            showUseCmdLine();
-    }
+    resetCLFileList();
+    const char* name = iterateCLFileList();
+    if(name != NULL && strlen(name) > 0)
+        open_file(name);
+    else
+        showUseCmdLine();
 
     if(asm_parse()) {
         printf("parse fail: %d error(s)\n", errors);
