@@ -11,6 +11,8 @@ Value* createValue(ValueType type, const char* name) {
     val->is_const = false;
     if(name != NULL)
         val->name = _copy_str(name);
+    else
+        val->name = NULL;
 
     return val;
 }
@@ -33,6 +35,17 @@ void assignBoolVal(Value* value, bool val) {
     value->is_assigned = true;
 }
 
+void assignAddrVal(Value* value, uint32_t val) {
+
+    value->data.addr = val;
+    value->is_assigned = true;
+}
+
+void assignValName(Value* val, const char* name) {
+
+    val->name = _copy_str(name);
+}
+
 void destroyValue(Value* val) {
 
     assert(val != NULL);
@@ -48,50 +61,51 @@ ValueType getValType(Value* val) {
 }
 
 
-ValueStore* createValueStore() {
+ValueTab* createValueTab() {
 
-    ValueStore* vs = _alloc_ds(ValueStore);
-    vs->cap = 1 << 3;
-    vs->len = 0;
-    vs->lst = _alloc_ds_array(Value*, vs->cap);
+    ValueTab* tab = _alloc_ds(ValueTab);
+    tab->list = createPtrLst();
+    tab->index = createHashTab();
 
-    return vs;
+    return tab;
 }
 
-void destroyValueStore(ValueStore* vs) {
+void destroyValueTab(ValueTab* vs) {
 
     assert(vs != NULL);
-    for(size_t i = 0; i < vs->len; i++)
-        destroyValue(vs->lst[i]);
-    _free(vs->lst);
+    for(Value* val = resetPtrLst(vs->list); val != NULL; val = iteratePtrLst(vs->list))
+        destroyValue(val);
+    destroyPtrLst(vs->list);
     _free(vs);
 }
 
-Value* getValue(ValueStore* store, size_t idx) {
+Value* getValueByIndex(ValueTab* tab, int idx) {
 
-    assert(store != NULL);
-
-    if(idx < store->len) {
-        return store->lst[idx];
-    }
-
-    return NULL;
+    assert(tab != NULL);
+    return (Value*)getPtrLst(tab->list, idx);
 }
 
-size_t addValue(ValueStore* store, Value* val, const char* name) {
+Value* getValueByName(ValueTab* tab, const char* name) {
 
-    assert(store != NULL);
+    assert(tab != NULL);
 
-    if(store->len + 1 > store->cap) {
-        store->cap <<= 1;
-        store->lst = _realloc_ds_array(store->lst, Value*, store->cap);
-    }
+    int idx;
+    if(findHashTab(tab->index, name, &idx, sizeof(idx)) == HASH_OK)
+        return getValueByIndex(tab, idx);
+    else
+        return NULL;
+}
 
-    if(name != NULL)
-        val->name = _copy_str(name);
-    size_t idx = store->len;
-    store->lst[store->len] = val;
-    store->len++;
+int addValue(ValueTab* tab, Value* val) {
+
+    assert(tab != NULL);
+
+    int idx = appendPtrLst(tab->list, val);
+    val->idx = idx;
+
+    if(val->name != NULL)
+        insertHashTab(tab->index, val->name, &idx, sizeof(idx));
+    appendPtrLst(tab->list, val);
 
     return idx;
 }
@@ -101,12 +115,13 @@ static const char* val_type_to_str(ValueType type) {
     return (type == VAL_NUM )? "NUMBER":
         (type == VAL_STR )? "STRING":
         (type == VAL_BVAL)? "BOOLEAN":
+        //(type == VAL_USER)? "USER":
         (type == VAL_ADDR)? "ADDRESS": "UNKNOWN";
 }
 
-void dumpValue(int idx, Value* val) {
+void dumpValue(Value* val) {
 
-    printf("\t%d:%s:%c:%c:\t\"%s\"\t", idx, val_type_to_str(val->type),
+    printf("%d:%s:%c:%c:\t\"%s\"\t", val->idx, val_type_to_str(val->type),
             val->is_assigned? 't': 'f', val->is_const? 't':'f',
             val->name? val->name: "");
 
@@ -117,50 +132,47 @@ void dumpValue(int idx, Value* val) {
         case VAL_BVAL: printf("%s ", val->data.bval? "true": "false"); break;
         default: printf("UNKNOWN"); break;
     }
-
-    printf("\n");
 }
 
-void dumpValueStore(ValueStore* store) {
+void dumpValueTab(ValueTab* tab) {
 
-    assert(store != NULL);
+    assert(tab != NULL);
 
-    size_t len = store->len;
-    Value** lst = store->lst;
-    printf("Value Store:\n");
-    for(size_t idx = 0; idx < len; idx++) {
-        dumpValue(idx, lst[idx]);
-    }
+    printf("Value Table:\n");
+    for(Value* val = resetPtrLst(tab->list); val != NULL;
+                val = iteratePtrLst(tab->list))
+        dumpValue(val);
 }
 
-static Value* load_value(FILE* fp) {
+static Value* load_value(FileBuf* fp) {
 
     Value* val = _alloc_ds(Value);
 
-    fread(&val->type, sizeof(val->type), 1, fp);
-    fread(&val->is_assigned, sizeof(val->is_assigned), 1, fp);
+    readFile(fp, &val->type, sizeof(val->type));
+    readFile(fp, &val->is_assigned, sizeof(val->is_assigned));
+    readFile(fp, &val->is_const, sizeof(val->is_const));
+    readFile(fp, &val->idx, sizeof(val->idx));
 
-    size_t sz;
-    fread(&sz, sizeof(sz), 1, fp);
+    size_t sz = 0;
+    readFile(fp, &sz, sizeof(sz));
     val->name = _alloc(sz);
-    fread((void*)val->name, sizeof(char), sz, fp);
-
+    readFile(fp, (void*)val->name, sz);
     if(val->is_assigned) {
         switch(val->type) {
             case VAL_NUM:
-                fread(&val->data.num, sizeof(val->data.num), 1, fp);
+                readFile(fp, &val->data.num, sizeof(val->data.num));
                 break;
             case VAL_ADDR:
-                fread(&val->data.addr, sizeof(val->data.addr), 1, fp);
+                readFile(fp, &val->data.addr, sizeof(val->data.addr));
                 break;
             case VAL_BVAL:
-                fread(&val->data.bval, sizeof(val->data.bval), 1, fp);
+                readFile(fp, &val->data.bval, sizeof(val->data.bval));
                 break;
             case VAL_STR: {
                     size_t slen;
-                    fread(&slen, sizeof(slen), 1, fp);
+                    readFile(fp, &slen, sizeof(slen));
                     val->data.str = _alloc(slen+1);
-                    fread(val->data.str, sizeof(char), slen, fp);
+                    readFile(fp, val->data.str, slen);
                 }
                 break;
         }
@@ -169,59 +181,72 @@ static Value* load_value(FILE* fp) {
     return val;
 }
 
-void loadValueStore(ValueStore* store, FILE* fp) {
+ValueTab* loadValueTab(FileBuf* fp) {
 
-    size_t len;
-    fread(&len, sizeof(len), 1, fp);
-    for(size_t idx = 0; idx < len; idx++) {
+    int len;
+    ValueTab* tab = createValueTab();
+
+    readFile(fp, &len, sizeof(len));
+
+    for(int idx = 0; idx < len; idx++) {
         Value* val = load_value(fp);
-        addValue(store, val, NULL);
+        addValue(tab, val);
     }
+
+    tab->index = loadHashTab(fp);
+
+    return tab;
 }
 
-static void save_value(Value* val, FILE* fp) {
+static void save_value(Value* val, FileBuf* fp) {
 
-    fwrite(&val->type, sizeof(val->type), 1, fp);
-    fwrite(&val->is_assigned, sizeof(val->is_assigned), 1, fp);
+    writeFile(fp, &val->type, sizeof(val->type));
+    writeFile(fp, &val->is_assigned, sizeof(val->is_assigned));
+    writeFile(fp, &val->is_const, sizeof(val->is_const));
+    writeFile(fp, &val->idx, sizeof(val->idx));
 
     if(val->name != NULL) {
         size_t sz = strlen(val->name) + 1;
-        fwrite(&sz, sizeof(sz), 1, fp);
-        fwrite(val->name, sizeof(char), sz, fp);
+        writeFile(fp, &sz, sizeof(sz));
+        writeFile(fp, (void*)val->name, sz);
     }
     else {
         size_t sz = 1;
-        fwrite(&sz, sizeof(sz), 1, fp);
+        writeFile(fp, &sz, sizeof(sz));
         char* buf[1] = {0};
-        fwrite(buf, sizeof(char), sz, fp);
+        writeFile(fp, buf, sz);
     }
 
     if(val->is_assigned) {
         switch(val->type) {
             case VAL_NUM:
-                fwrite(&val->data.num, sizeof(val->data.num), 1, fp);
+                writeFile(fp, &val->data.num, sizeof(val->data.num));
                 break;
             case VAL_ADDR:
-                fwrite(&val->data.addr, sizeof(val->data.addr), 1, fp);
+                writeFile(fp, &val->data.addr, sizeof(val->data.addr));
                 break;
             case VAL_BVAL:
-                fwrite(&val->data.bval, sizeof(val->data.bval), 1, fp);
+                writeFile(fp, &val->data.bval, sizeof(val->data.bval));
                 break;
             case VAL_STR: {
                     size_t slen = strlen(val->data.str)+1;
-                    fwrite(&slen, sizeof(slen), 1, fp);
-                    fwrite(val->data.str, sizeof(char), slen, fp);
+                    writeFile(fp, &slen, sizeof(slen));
+                    writeFile(fp, val->data.str, slen);
                 }
                 break;
         }
     }
 }
 
-void saveValueStore(ValueStore* store, FILE* fp) {
+void saveValueTab(ValueTab* tab, FileBuf* fp) {
 
-    fwrite(&store->len, sizeof(store->len), 1, fp);
-    for(size_t idx = 0; idx < store->len; idx++)
-        save_value(store->lst[idx], fp);
+    Value** vlst = (Value**)getRawPtrLst(tab->list);
+    int len = getLenPtrLst(tab->list);
+
+    writeFile(fp, &len, sizeof(len));
+    for(int idx = 0; idx < len; idx++)
+        save_value(vlst[idx], fp);
+
+    saveHashTab(tab->index, fp);
 }
-
 

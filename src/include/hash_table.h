@@ -35,4 +35,7 @@ HashTabResult findHashTab(HashTab* tab, const char* key, void* data, size_t size
 HashTabResult removeHashTab(HashTab* tab, const char* key);
 void dumpHashTab(HashTab* tab);
 
+void saveHashTab(HashTab* tab, FileBuf* fp);
+HashTab* loadHashTab(FileBuf* fp);
+
 #endif /* _HASH_TABLE_H */

@@ -25,7 +25,7 @@ size_t getInstrBufIdx(InstrBuf* ptr);
 InstrBufResult setInstrBufLoc(InstrBuf* ptr, size_t loc);
 
 #include <stdio.h>
-InstrBufResult loadInstrBuf(InstrBuf* ptr, FILE* fp);
-InstrBufResult saveInstrBuf(InstrBuf* ptr, FILE* fp);
+InstrBuf* loadInstrBuf(FileBuf* fp);
+InstrBufResult saveInstrBuf(InstrBuf* ptr, FileBuf* fp);
 
 #endif

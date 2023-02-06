@@ -77,7 +77,7 @@ void disasm(Assembler* ptr) {
             case OP_PUSHS: {
                     uint16_t val;
                     readInstrBuf(ibuf, &val, sizeof(val));
-                    Value* vptr = getValue(ptr->valStore, val);
+                    Value* vptr = getValueByIndex(ptr->valTab, val);
                     printf("%s\t; index number %d\n", vptr->name, val);
                 }
                 break;
@@ -97,7 +97,7 @@ void disasm(Assembler* ptr) {
                     uint16_t num;
                     readInstrBuf(ibuf, &regs, sizeof(regs));
                     readInstrBuf(ibuf, &num, sizeof(num));
-                    Value* vptr = getValue(ptr->valStore, num);
+                    Value* vptr = getValueByIndex(ptr->valTab, num);
                     printf("%s, %s\t; index number %d\n",
                            regToStr(regs&0x0F), vptr->name, num);
                 }
@@ -107,7 +107,7 @@ void disasm(Assembler* ptr) {
                     uint16_t num;
                     readInstrBuf(ibuf, &regs, sizeof(regs));
                     readInstrBuf(ibuf, &num, sizeof(num));
-                    Value* vptr = getValue(ptr->valStore, num);
+                    Value* vptr = getValueByIndex(ptr->valTab, num);
                     printf("%s, anonymous\t; index number ", regToStr(regs&0x0F));
                     dumpValue(num, vptr);
                 }
@@ -124,7 +124,7 @@ void disasm(Assembler* ptr) {
                     uint16_t num;
                     readInstrBuf(ibuf, &num, sizeof(num));
                     readInstrBuf(ibuf, &regs, sizeof(regs));
-                    Value* vptr = getValue(ptr->valStore, num);
+                    Value* vptr = getValueByIndex(ptr->valTab, num);
                     printf("%s, %s\t; index number %d\n",
                            vptr->name, regToStr(regs&0x0F), num);
                 }
@@ -140,8 +140,7 @@ void disasm(Assembler* ptr) {
                 }
                 break;
             default:
-                fprintf(stderr, "fatal error: unknown opcode: 0x%02X\n", op);
-                exit(1);
+                fatal_error("fatal error: unknown opcode: 0x%02X\n", op);
         }
     } while(ibuf->idx < ibuf->len);
 

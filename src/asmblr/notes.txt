@@ -7,10 +7,18 @@ conventional MPU or MCU.
 load instruction refers to a symbol, then look it up in the value table, and if
 it is not found there, then treat it as an address forward reference. }
 
+{ Looking at storing label definitions in the value store to allow jumping to
+register and variable content.}
+
+{ Debug information stores address and name and is indexed by the address. }
+
+{ Linker information is stored as location of the reference to a label and the
+location of the label definition. When the module is linked, the address of the
+reference is edited with the address of the definition. }
+
 <done> { Add characters such as $%& to valid symbols }
 
-<done>
-{ Address resolution.
+<done> { Address resolution.
 
 There are address definitions as labels and there are address references as
 jump destinations. The definition, when it appears, needs to retrieve a

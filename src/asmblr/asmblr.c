@@ -5,7 +5,7 @@
 #include "scanner.h"
 #include "address.h"
 
-Assembler* asmblr = NULL;
+Module* module = NULL;
 int errors = 0;
 
 void dump_hash(HashTab* tab) {
@@ -20,14 +20,14 @@ void dump_hash(HashTab* tab) {
     }
 }
 
-void disasm(Assembler*);
+void disasm(Module*);
 
 void dump_tables(Assembler* ptr) {
 
     printf("\n");
     disasm(ptr);
     printf("\n");
-    dumpValueStore(ptr->valStore);
+    dumpValueTab(ptr->valTab);
     dumpAddrs(ptr);
     printf("\n");
 }
@@ -51,90 +51,19 @@ void syntax_error(const char* fmt, ...) {
     errors++;
 }
 
-Assembler* createAsmblr() {
+void __ferror(const char* func, int line, const char* fmt, ...) {
 
-    Assembler* ptr = _alloc_ds(Assembler);
+    fprintf(stderr, "%s:%d: fatal error, ", func, line);
 
-    ptr->valStore = createValueStore();
-    ptr->instrBuf = createInstrBuf();
-    ptr->symbols = createHashTab();
-    ptr->addrDefs = createAddrDefTab();
-    ptr->addrRefs = createAddrRefTab();
+    va_list args;
 
-    return ptr;
-}
+    va_start(args, fmt);
+    vfprintf(stderr, fmt, args);
+    va_end(args);
+    fprintf(stderr, "\n");
 
-void destroyAsmblr(Assembler* ptr) {
-
-    destroyValueStore(ptr->valStore);
-    destroyInstrBuf(ptr->instrBuf);
-    destroyHashTab(ptr->symbols);
-    destroyAddrDefTab(ptr->addrDefs);
-    destroyAddrRefTab(ptr->addrRefs);
-    destroyCmdLine();
-
-    _free(ptr);
-}
-
-void save_module(const char* fname, Assembler* ptr) {
-
-    FILE* fp = fopen(fname, "w+");
-    if(fp == NULL) {
-        fprintf(stderr,
-                "fatal error: cannot open output file: %s: %s\n",
-                fname, strerror(errno));
-        exit(1);
-    }
-    saveInstrBuf(ptr->instrBuf, fp);
-    saveValueStore(ptr->valStore, fp);
-
-    HashTab* tab = ptr->addrDefs;
-    fwrite(&tab->count, sizeof(tab->count), 1, fp);
-    for(int i = 0; i < tab->cap; i++) {
-        if(tab->table[i] != NULL) {
-            if(tab->table[i]->key != NULL) {
-                size_t idx = *(size_t*)tab->table[i]->data;
-                fwrite(&idx, sizeof(idx), 1, fp);
-                idx = strlen(tab->table[i]->key) + 1;
-                fwrite(&idx, sizeof(idx), 1, fp);
-                fwrite(tab->table[i]->key, sizeof(char), idx, fp);
-            }
-        }
-    }
-
-    fclose(fp);
-}
-
-Assembler* load_module(const char* fname) {
-
-    FILE* fp = fopen(fname, "r+");
-    if(fp == NULL) {
-        fprintf(stderr,
-                "fatal error: cannot open input file: %s: %s\n",
-                fname, strerror(errno));
-        exit(1);
-    }
-
-    Assembler* ptr = createAsmblr();
-
-    loadInstrBuf(ptr->instrBuf, fp);
-    loadValueStore(ptr->valStore, fp);
-
-    HashTab* tab = ptr->addrDefs;
-    int count;
-    fread(&count, sizeof(count), 1, fp);
-
-    for(int i = 0; i < count; i++) {
-        size_t sz, idx;
-        fread(&idx, sizeof(idx), 1, fp);
-        fread(&sz, sizeof(sz), 1, fp);
-        char* str = _alloc(sz);
-        fread(str, sizeof(char), sz, fp);
-        insertHashTab(tab, str, &idx, sizeof(idx));
-    }
-
-    fclose(fp);
-    return ptr;
+    errors++;
+    exit(1);
 }
 
 int main(int argc, char** argv) {
@@ -147,7 +76,7 @@ int main(int argc, char** argv) {
     addCBwoParam("-h", "show the help information", showUseCmdLine, CL_NONE);
     parseCmdLine(argc, argv);
 
-    asmblr = createAsmblr();
+    module = createModule();
 
     resetCLFileList();
     const char* name = iterateCLFileList();
@@ -160,16 +89,17 @@ int main(int argc, char** argv) {
         printf("parse fail: %d error(s)\n", errors);
         return 1;
     }
-    fixupAddrs(asmblr);
+    fixupAddrs(module);
 
     if(errors == 0 && getNumParam("verbose") >= 1)
-        dump_tables(asmblr);
+        dump_tables(module);
 
-    save_module(getStrParam("ofile"), asmblr);
+    saveModule(getStrParam("ofile"), module);
 
-    destroyAsmblr(asmblr);
+    destroyModule(module);
+    destroyCmdLine();
 
-    Assembler* a = load_module("test.bin");
+    Assembler* a = loadModule("test.bin");
     dump_tables(a);
 
     return 0;

@@ -10,6 +10,8 @@ add_library(${PROJECT_NAME}
         instructions.c
         values.c
         cmdline.c
+        file_io.c
+        module.c
 )
 
 target_include_directories(${PROJECT_NAME}

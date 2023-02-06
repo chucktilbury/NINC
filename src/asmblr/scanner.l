@@ -1,6 +1,7 @@
 %{
 #include "common.h"
 #include "parser.h"
+#include "asmblr.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wimplicit-function-declaration"
@@ -241,9 +242,7 @@ int open_file(const char *fname) {
     // file_name = _copy_str(fname);
     yyin = fopen(fname, "r");
     if(yyin == NULL) {
-        fprintf(stderr, "fatal error: cannot open input file: %s: %s\n", fname,
-                strerror(errno));
-        exit(1);
+        fatal_error("cannot open input file: %s: %s\n", fname, strerror(errno));
     }
     fs->fptr = yyin;
     fs->buffer = yy_create_buffer(yyin, YY_BUF_SIZE);

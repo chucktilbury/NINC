@@ -16,12 +16,18 @@ struct _ptr_lst_ {
 
 PtrLst* createPtrLst();
 PtrLstResult destroyPtrLst(PtrLst* lst);
+
 PtrLstResult appendPtrLst(PtrLst* lst, void* data);
 void* getPtrLst(PtrLst* lst, int idx);
+
 void* resetPtrLst(PtrLst* lst);
 void* iteratePtrLst(PtrLst* lst);
+
 PtrLstResult pushPtrLst(PtrLst* lst, void* data);
 void* popPtrLst(PtrLst* lst);
 void* peekPtrLst(PtrLst* lst);
+
+void** getRawPtrLst(PtrLst* lst);
+int getLenPtrLst(PtrLst* lst);
 
 #endif

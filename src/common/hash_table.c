@@ -221,75 +221,74 @@ void dumpHashTab(HashTab* tab) {
     printf("\n");
 }
 
-#ifdef HASH_TABLE_TEST
+void saveHashTab(HashTab* tab, FileBuf* fp) {
 
-int main() {
+    size_t slen;
 
-    const char* keys[] = { "qwer", "asdf", "zxcv", "wert", "sdfg",
-                           "xcvb", "erty", "dfgh", "cvbn", "rtyu",
-                           "fghj", "vbnm", "tyui", "ghjk", "bnm",
-                           "yuio", "hjkl", "uiop", "jkl",  NULL };
+    writeFile(fp, &tab->count, sizeof(tab->count));
 
-    HashTab* table = createHashTab();
-    long value;
-
-    for(int i = 0; i < 5; i++) {
-        value = random();
-        insertHashTab(table, keys[i], &value, sizeof(value));
+    for(int i = 0; i < tab->cap; i++) {
+        if(tab->table[i] != NULL) {
+            if(tab->table[i]->key != NULL) {
+                // write the key
+                slen = strlen(tab->table[i]->key) + 1;
+                writeFile(fp, &slen, sizeof(slen));
+                writeFile(fp, (void*)tab->table[i]->key, slen);
+                // write the data
+                slen = tab->table[i]->size;
+                writeFile(fp, &slen, sizeof(slen));
+                writeFile(fp, tab->table[i]->data, slen);
+            }
+        }
     }
-
-    dumpHashTable(table);
-
-    for(int i = 5; i < 6; i++) {
-        value = random();
-        insertHashTab(table, keys[i], &value, sizeof(value));
-    }
-
-    dumpHashTable(table);
-
-    for(int i = 3; keys[i] != NULL; i++) {
-        value = random();
-        insertHashTab(table, keys[i], &value, sizeof(value));
-    }
-
-    dumpHashTable(table);
-
-    removeHashTab(table, "vbnm");
-    removeHashTab(table, "jkl");
-    removeHashTab(table, "xcvb");
-    removeHashTab(table, "ghjk");
-
-    dumpHashTable(table);
-
-    value = random();
-    insertHashTab(table, "vbnm", &value, sizeof(value));
-    value = random();
-    insertHashTab(table, "ghjk", &value, sizeof(value));
-
-    dumpHashTable(table);
-
-    long val;
-    char* str = "ghjk";
-    bool res = findHashTab(table, str, &val, sizeof(val));
-    printf("find: %s: %s: %lu\n", str, res ? "true" : "false", val);
-    val = 0;
-
-    str = "sdfg";
-    res = findHashTab(table, str, &val, sizeof(val));
-    printf("find: %s: %s: %lu\n", str, res ? "true" : "false", val);
-    val = 0;
-
-    str = "jkl";
-    res = findHashTab(table, str, &val, sizeof(val));
-    printf("find: %s: %s: %lu\n", str, res ? "true" : "false", val);
-    val = 0;
-
-    str = "erty";
-    res = findHashTab(table, str, &val, sizeof(val));
-    printf("find: %s: %s: %lu\n\n", str, res ? "true" : "false", val);
-    val = 0;
-
-    return 0;
 }
 
-#endif
+// this inserts items without allocating them.
+static void insert_item(HashTab* table, const char* key, HashNode* node) {
+
+    rehash_table(table);
+
+    int slot = find_slot(table, key);
+    if(slot < 0)
+        return;
+
+    // help me, obi wan optimizer, you are my only hope
+    if(table->table[slot] != NULL) {
+        if(table->table[slot]->key != NULL)
+            return; // don't store junk.
+    }
+    else {
+        table->table[slot] = node;
+        table->count++;
+    }
+
+    table->table[slot]->key = key;
+}
+
+HashTab* loadHashTab(FileBuf* fp){
+
+    int count;
+    size_t len;
+    HashTab* tab = createHashTab();
+
+    readFile(fp, &count, sizeof(count));
+
+    for(int i = 0 ; i < count; i++) {
+        // read the key
+        readFile(fp, &len, sizeof(len));
+        const char* str = _alloc(len);
+        readFile(fp, (void*)str, len);
+
+        // read the data and create the node.
+        HashNode* node = _alloc_ds(HashNode);
+
+        readFile(fp, &len, sizeof(len));
+        node->data = _alloc(len);
+        readFile(fp, node->data, len);
+
+        insert_item(tab, str, node);
+    }
+
+    return tab;
+}
+

@@ -101,3 +101,13 @@ void* peekPtrLst(PtrLst* lst) {
 
     return ptr;
 }
+
+void** getRawPtrLst(PtrLst* lst) {
+
+    return lst->list;
+}
+
+int getLenPtrLst(PtrLst* lst) {
+
+    return lst->len;
+}

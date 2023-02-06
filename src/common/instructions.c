@@ -92,15 +92,12 @@ InstrBufResult setInstrBufLoc(InstrBuf* ptr, size_t loc) {
     return INSTR_BUF_ERROR;
 }
 
-InstrBufResult loadInstrBuf(InstrBuf* ptr, FILE* fp) {
+InstrBuf* loadInstrBuf(FileBuf* fp) {
 
-    assert(ptr != NULL);
+    InstrBuf* ptr = createInstrBuf();
     size_t len;
-    size_t result;
 
-    result = fread(&len, sizeof(len), 1, fp);
-    if(result != 1)
-        return INSTR_BUF_ERROR;
+    readFile(fp, &len, sizeof(len));
 
     if(len > ptr->cap) {
         while(len > ptr->cap)
@@ -108,26 +105,18 @@ InstrBufResult loadInstrBuf(InstrBuf* ptr, FILE* fp) {
         ptr->buffer = _realloc(ptr->buffer, ptr->cap);
     }
 
-    result = fread(ptr->buffer, sizeof(char), len, fp);
-    if(result != len)
-        return INSTR_BUF_ERROR;
+    readFile(fp, ptr->buffer, len);
     ptr->len = len;
 
-    return INSTR_BUF_OK;
+    return ptr;
 }
 
-InstrBufResult saveInstrBuf(InstrBuf* ptr, FILE* fp) {
+InstrBufResult saveInstrBuf(InstrBuf* ptr, FileBuf* fp) {
 
     assert(ptr != NULL);
-    size_t result;
 
-    result = fwrite(&ptr->len, sizeof(ptr->len), 1, fp);
-    if(result != 1)
-        return INSTR_BUF_ERROR;
-
-    result = fwrite(ptr->buffer, sizeof(char), ptr->len, fp);
-    if(result != ptr->len)
-        return INSTR_BUF_ERROR;
+    writeFile(fp, &ptr->len, sizeof(ptr->len));
+    writeFile(fp, ptr->buffer, ptr->len);
 
     return INSTR_BUF_OK;
 }

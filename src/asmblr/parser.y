@@ -10,7 +10,7 @@
 #include "emit.h"
 #include "address.h"
 
-extern Assembler* asmblr;
+extern Module* module;
 
 %}
 
@@ -57,12 +57,12 @@ extern Assembler* asmblr;
 
 %%
 
-module
+root_nonterminal
     : {
-            addAddrDef(asmblr, "begin_instructions");
+            addAddrDef(module, "begin_instructions");
         }module_list {
             // make sure that the last thing is a NOP
-            emit_instr(asmblr->instrBuf, OP_NOP);
+            emit_instr(module->instrBuf, OP_NOP);
         }
     ;
 
@@ -101,27 +101,27 @@ bool_value
 
 data_definition
     : type_preamble SYMBOL {
-            size_t idx = addValue(asmblr->valStore, $1, $2);
-            if(insertHashTab(asmblr->symbols, $2, &idx, sizeof(idx)))
+            size_t idx = addValue(module->valTab, $1, $2);
+            if(insertHashTab(module->symbols, $2, &idx, sizeof(idx)))
                 syntax_error("symbol \"%s\" is already defined", $2);
         }
     | type_preamble SYMBOL '=' NUM {
-            size_t idx = addValue(asmblr->valStore, $1, $2);
-            if(insertHashTab(asmblr->symbols, $2, &idx, sizeof(idx)))
+            size_t idx = addValue(module->valTab, $1, $2);
+            if(insertHashTab(module->symbols, $2, &idx, sizeof(idx)))
                 syntax_error("symbol \"%s\" is already defined", $2);
             else
                 assignNumVal($1, $4);
         }
     | type_preamble SYMBOL '=' QSTRG {
-            size_t idx = addValue(asmblr->valStore, $1, $2);
-            if(insertHashTab(asmblr->symbols, $2, &idx, sizeof(idx)))
+            size_t idx = addValue(module->valTab, $1, $2);
+            if(insertHashTab(module->symbols, $2, &idx, sizeof(idx)))
                 syntax_error("symbol \"%s\" is already defined", $2);
             else
                 assignStrVal($1, $4);
         }
     | type_preamble SYMBOL '=' bool_value {
-            size_t idx = addValue(asmblr->valStore, $1, $2);
-            if(insertHashTab(asmblr->symbols, $2, &idx, sizeof(idx)))
+            size_t idx = addValue(module->valTab, $1, $2);
+            if(insertHashTab(module->symbols, $2, &idx, sizeof(idx)))
                 syntax_error("symbol \"%s\" is already defined", $2);
             else
                 assignBoolVal($1, $4);
@@ -130,116 +130,116 @@ data_definition
 
 label_definition
     : SYMBOL ':' {
-            addAddrDef(asmblr, $1);
+            addAddrDef(module, $1);
         }
     ;
 
     /* Flow control instructions accept the name of a label. */
 flow_instruction
     : CALL SYMBOL {
-            emit_instr(asmblr->instrBuf, OP_CALL);
-            addAddrRef(asmblr, $2);
-            emit_addr(asmblr->instrBuf, 0);
+            emit_instr(module->instrBuf, OP_CALL);
+            addAddrRef(module, $2);
+            emit_addr(module->instrBuf, 0);
         }
     | JMP SYMBOL {
-            emit_instr(asmblr->instrBuf, OP_JMP);
-            addAddrRef(asmblr, $2);
-            emit_addr(asmblr->instrBuf, 0);
+            emit_instr(module->instrBuf, OP_JMP);
+            addAddrRef(module, $2);
+            emit_addr(module->instrBuf, 0);
         }
     | BR SYMBOL {
-            emit_instr(asmblr->instrBuf, OP_BR);
-            addAddrRef(asmblr, $2);
-            emit_addr(asmblr->instrBuf, 0);
+            emit_instr(module->instrBuf, OP_BR);
+            addAddrRef(module, $2);
+            emit_addr(module->instrBuf, 0);
         }
     ;
 
 instruction_definition
     : flow_instruction
     | EXIT {
-            emit_instr(asmblr->instrBuf, OP_EXIT);
+            emit_instr(module->instrBuf, OP_EXIT);
         }
     | RETURN {
-            emit_instr(asmblr->instrBuf, OP_RETURN);
+            emit_instr(module->instrBuf, OP_RETURN);
         }
     | NOP {
-            emit_instr(asmblr->instrBuf, OP_NOP);
+            emit_instr(module->instrBuf, OP_NOP);
         }
     | BREAK {
-            emit_instr(asmblr->instrBuf, OP_BREAK);
+            emit_instr(module->instrBuf, OP_BREAK);
         }
     /* One register operand */
     | NOT register ',' register {
-            emit_instr(asmblr->instrBuf, OP_NOT);
-            emit_2_reg(asmblr->instrBuf, $2, $4);
+            emit_instr(module->instrBuf, OP_NOT);
+            emit_2_reg(module->instrBuf, $2, $4);
         }
     /* Two register operands */
     | NEG register ',' register {
-            emit_instr(asmblr->instrBuf, OP_NEG);
-            emit_2_reg(asmblr->instrBuf, $2, $4);
+            emit_instr(module->instrBuf, OP_NEG);
+            emit_2_reg(module->instrBuf, $2, $4);
         }
     | EQ register ',' register {
-            emit_instr(asmblr->instrBuf, OP_EQ);
-            emit_2_reg(asmblr->instrBuf, $2, $4);
+            emit_instr(module->instrBuf, OP_EQ);
+            emit_2_reg(module->instrBuf, $2, $4);
         }
     | NEQ register ',' register {
-            emit_instr(asmblr->instrBuf, OP_NEQ);
-            emit_2_reg(asmblr->instrBuf, $2, $4);
+            emit_instr(module->instrBuf, OP_NEQ);
+            emit_2_reg(module->instrBuf, $2, $4);
         }
     | LTE register ',' register {
-            emit_instr(asmblr->instrBuf, OP_LTE);
-            emit_2_reg(asmblr->instrBuf, $2, $4);
+            emit_instr(module->instrBuf, OP_LTE);
+            emit_2_reg(module->instrBuf, $2, $4);
         }
     | GTE register ',' register {
-            emit_instr(asmblr->instrBuf, OP_GTE);
-            emit_2_reg(asmblr->instrBuf, $2, $4);
+            emit_instr(module->instrBuf, OP_GTE);
+            emit_2_reg(module->instrBuf, $2, $4);
         }
     | LT register ',' register {
-            emit_instr(asmblr->instrBuf, OP_LT);
-            emit_2_reg(asmblr->instrBuf, $2, $4);
+            emit_instr(module->instrBuf, OP_LT);
+            emit_2_reg(module->instrBuf, $2, $4);
         }
     | GT register ',' register {
-            emit_instr(asmblr->instrBuf, OP_GT);
-            emit_2_reg(asmblr->instrBuf, $2, $4);
+            emit_instr(module->instrBuf, OP_GT);
+            emit_2_reg(module->instrBuf, $2, $4);
         }
     | LOAD register ',' register {
-            emit_instr(asmblr->instrBuf, OP_LOADR);
-            emit_2_reg(asmblr->instrBuf, $2, $4);
+            emit_instr(module->instrBuf, OP_LOADR);
+            emit_2_reg(module->instrBuf, $2, $4);
         }
     /* Three register operands */
     | ADD register ',' register ',' register {
-            emit_instr(asmblr->instrBuf, OP_ADD);
-            emit_3_reg(asmblr->instrBuf, $2, $4, $6);
+            emit_instr(module->instrBuf, OP_ADD);
+            emit_3_reg(module->instrBuf, $2, $4, $6);
         }
     | SUB register ',' register ',' register {
-            emit_instr(asmblr->instrBuf, OP_SUB);
-            emit_3_reg(asmblr->instrBuf, $2, $4, $6);
+            emit_instr(module->instrBuf, OP_SUB);
+            emit_3_reg(module->instrBuf, $2, $4, $6);
         }
     | MUL register ',' register ',' register {
-            emit_instr(asmblr->instrBuf, OP_MUL);
-            emit_3_reg(asmblr->instrBuf, $2, $4, $6);
+            emit_instr(module->instrBuf, OP_MUL);
+            emit_3_reg(module->instrBuf, $2, $4, $6);
         }
     | DIV register ',' register ',' register {
-            emit_instr(asmblr->instrBuf, OP_DIV);
-            emit_3_reg(asmblr->instrBuf, $2, $4, $6);
+            emit_instr(module->instrBuf, OP_DIV);
+            emit_3_reg(module->instrBuf, $2, $4, $6);
         }
     | MOD register ',' register ',' register {
-            emit_instr(asmblr->instrBuf, OP_MOD);
-            emit_3_reg(asmblr->instrBuf, $2, $4, $6);
+            emit_instr(module->instrBuf, OP_MOD);
+            emit_3_reg(module->instrBuf, $2, $4, $6);
         }
     /* Trap instruction. Convert index to int. */
     | TRAP NUM {
-            emit_instr(asmblr->instrBuf, OP_TRAP);
-            emit_val(asmblr->instrBuf, ((uint16_t)$2)&0xFFFF);
+            emit_instr(module->instrBuf, OP_TRAP);
+            emit_val(module->instrBuf, ((uint16_t)$2)&0xFFFF);
         }
     /* Load the value of a var into a register */
     | LOAD register ',' SYMBOL {
             size_t idx;
-            if(findHashTab(asmblr->symbols, $4, &idx, sizeof(idx)))
+            if(findHashTab(module->symbols, $4, &idx, sizeof(idx)))
                 syntax_error("symbol \"%s\" not defined", $4);
             else {
-                emit_instr(asmblr->instrBuf, OP_LOAD);
-                emit_1_reg(asmblr->instrBuf, $2);
-                emit_val(asmblr->instrBuf, ((uint16_t)idx)&0xFFFF);
+                emit_instr(module->instrBuf, OP_LOAD);
+                emit_1_reg(module->instrBuf, $2);
+                emit_val(module->instrBuf, ((uint16_t)idx)&0xFFFF);
             }
         }
     /* Load a literal value into a register */
@@ -248,71 +248,71 @@ instruction_definition
             val->data.num = $4;
             val->is_const = true;
             val->is_assigned = true;
-            emit_instr(asmblr->instrBuf, OP_LOADL);
-            emit_1_reg(asmblr->instrBuf, $2);
-            uint16_t idx = addValue(asmblr->valStore, val, NULL);
-            emit_val(asmblr->instrBuf, idx);
+            emit_instr(module->instrBuf, OP_LOADL);
+            emit_1_reg(module->instrBuf, $2);
+            uint16_t idx = addValue(module->valTab, val, NULL);
+            emit_val(module->instrBuf, idx);
         }
     | LOAD register ',' QSTRG {
             Value* val = createValue(VAL_STR, NULL);
             val->data.str = $4;
             val->is_const = true;
             val->is_assigned = true;
-            emit_instr(asmblr->instrBuf, OP_LOADL);
-            emit_1_reg(asmblr->instrBuf, $2);
-            uint16_t idx = addValue(asmblr->valStore, val, NULL);
-            emit_val(asmblr->instrBuf, idx);
+            emit_instr(module->instrBuf, OP_LOADL);
+            emit_1_reg(module->instrBuf, $2);
+            uint16_t idx = addValue(module->valTab, val, NULL);
+            emit_val(module->instrBuf, idx);
         }
     | LOAD register ',' bool_value {
             Value* val = createValue(VAL_BVAL, NULL);
             val->data.bval = $4;
             val->is_const = true;
             val->is_assigned = true;
-            emit_instr(asmblr->instrBuf, OP_LOADL);
-            emit_1_reg(asmblr->instrBuf, $2);
-            uint16_t idx = addValue(asmblr->valStore, val, NULL);
-            emit_val(asmblr->instrBuf, idx);
+            emit_instr(module->instrBuf, OP_LOADL);
+            emit_1_reg(module->instrBuf, $2);
+            uint16_t idx = addValue(module->valTab, val, NULL);
+            emit_val(module->instrBuf, idx);
         }
     /* Store the value of a register into a var */
     | STORE SYMBOL ',' register {
             size_t idx;
-            if(findHashTab(asmblr->symbols, $2, &idx, sizeof(idx)))
+            if(findHashTab(module->symbols, $2, &idx, sizeof(idx)))
                 syntax_error("symbol \"%s\" not defined", $4);
             else {
-                emit_instr(asmblr->instrBuf, OP_STORE);
-                emit_val(asmblr->instrBuf, ((uint16_t)idx)&0xFFFF);
-                emit_1_reg(asmblr->instrBuf, $4);
+                emit_instr(module->instrBuf, OP_STORE);
+                emit_val(module->instrBuf, ((uint16_t)idx)&0xFFFF);
+                emit_1_reg(module->instrBuf, $4);
             }
         }
     /* Peek at the stack with a given register and index. */
     | PEEK register ',' register ',' NUM {
-            emit_instr(asmblr->instrBuf, OP_PEEK);
-            emit_2_reg(asmblr->instrBuf, $2, $4);
-            emit_val(asmblr->instrBuf, ((uint16_t)$6)&0xFFFF);
+            emit_instr(module->instrBuf, OP_PEEK);
+            emit_2_reg(module->instrBuf, $2, $4);
+            emit_val(module->instrBuf, ((uint16_t)$6)&0xFFFF);
         }
     | POP register {
-            emit_instr(asmblr->instrBuf, OP_POP);
-            emit_1_reg(asmblr->instrBuf, $2);
+            emit_instr(module->instrBuf, OP_POP);
+            emit_1_reg(module->instrBuf, $2);
         }
     /* Push a register onto the stack */
     | PUSH register {
-            emit_instr(asmblr->instrBuf, OP_PUSH);
-            emit_1_reg(asmblr->instrBuf, $2);
+            emit_instr(module->instrBuf, OP_PUSH);
+            emit_1_reg(module->instrBuf, $2);
         }
     /* Push the value of the var onto the stack. */
     | PUSH SYMBOL {
             size_t idx;
-            if(findHashTab(asmblr->symbols, $2, &idx, sizeof(idx)))
+            if(findHashTab(module->symbols, $2, &idx, sizeof(idx)))
                 syntax_error("symbol \"%s\" not defined", $2);
             else {
-                emit_instr(asmblr->instrBuf, OP_PUSHS);
-                emit_val(asmblr->instrBuf, ((uint16_t)idx)&0xFFFF);
+                emit_instr(module->instrBuf, OP_PUSHS);
+                emit_val(module->instrBuf, ((uint16_t)idx)&0xFFFF);
             }
         }
     /* Store the current stack index into the specified register */
     | SIDX register {
-            emit_instr(asmblr->instrBuf, OP_SIDX);
-            emit_1_reg(asmblr->instrBuf, $2);
+            emit_instr(module->instrBuf, OP_SIDX);
+            emit_1_reg(module->instrBuf, $2);
         }
     ;
 
